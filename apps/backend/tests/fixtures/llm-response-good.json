@@ -1,0 +1,38 @@
+[
+  {
+    "start_time": 16,
+    "end_time": 30,
+    "spoken_text": "In 2018, Jean Twenge published iGen, a book that analyzed generational differences in mental health tied to smartphone usage. Twenge's analysis covered data from over a million teenagers and found a sharp increase in depression and loneliness starting around 2012.",
+    "claim": "Jean Twenge's 2018 book iGen documented generational mental health declines correlated with smartphone adoption, based on data from over a million teenagers.",
+    "claim_type": "book",
+    "search_query": "Jean Twenge iGen book 2018 smartphone teenagers mental health",
+    "confidence": "high"
+  },
+  {
+    "start_time": 35,
+    "end_time": 54,
+    "spoken_text": "in 2023, The New York Times published an investigation called 'Inside the Secret Facebook Files' which revealed internal Meta research showing the company knew Instagram was harmful to teenage girls' body image. That NYT piece by Kashmir Hill and colleagues drew on documents from the Facebook Papers whistleblower Frances Haugen.",
+    "claim": "A 2023 New York Times investigation based on Facebook Papers documents revealed Meta's internal research showed Instagram harms teenage girls' body image.",
+    "claim_type": "news_article",
+    "search_query": "New York Times secret Facebook files Instagram teenage girls 2023",
+    "confidence": "high"
+  },
+  {
+    "start_time": 54,
+    "end_time": 62,
+    "spoken_text": "According to a 2023 Pew Research Center survey, 46 percent of teens say social media makes them feel worse about their own lives.",
+    "claim": "A 2023 Pew Research Center survey found that 46% of teens report social media makes them feel worse about their own lives.",
+    "claim_type": "statistic",
+    "search_query": "Pew Research 2023 teens social media feel worse lives 46 percent",
+    "confidence": "high"
+  },
+  {
+    "start_time": 70,
+    "end_time": 92,
+    "spoken_text": "a 2022 paper published in Nature Human Behaviour by Amy Orben and Andrew Przybylski found that the association between screen time and adolescent well-being is actually quite small — smaller than effects from wearing glasses. Orben and Przybylski used a technique called specification curve analysis to test thousands of different model specifications.",
+    "claim": "A 2022 Nature Human Behaviour paper by Amy Orben and Andrew Przybylski found the association between screen time and adolescent well-being is smaller than the effect of wearing glasses, using specification curve analysis.",
+    "claim_type": "academic_paper",
+    "search_query": "Orben Przybylski 2022 Nature Human Behaviour screen time adolescent wellbeing specification curve",
+    "confidence": "high"
+  }
+]
