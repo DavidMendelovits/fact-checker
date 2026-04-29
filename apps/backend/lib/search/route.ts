@@ -1,5 +1,5 @@
-import { ClaimType, RawCitation } from "@citecast/shared";
-import { SearchProvider } from "./types";
+import { ClaimType } from "@citecast/shared";
+import { SearchProvider, BaseClaim } from "./types";
 
 type ProviderName = "semantic-scholar" | "brave" | "perplexity";
 
@@ -33,7 +33,7 @@ function getRoutingTable(): Record<ClaimType, ProviderName[]> {
 }
 
 export function routeClaim(
-  claim: RawCitation,
+  claim: BaseClaim,
   providers: Record<string, SearchProvider>
 ): SearchProvider[] {
   const routing = getRoutingTable();

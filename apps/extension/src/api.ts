@@ -1,4 +1,4 @@
-import type { AnnotationResponse } from "@citecast/shared";
+import type { AnnotationResponse, ArticleAnnotationResponse } from "@citecast/shared";
 
 export interface Settings {
   backendUrl: string;
@@ -67,6 +67,56 @@ export async function fetchAnnotations(videoId: string): Promise<AnnotationRespo
     }
 
     const data = await response.json() as AnnotationResponse;
+    return data;
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Network error";
+    return {
+      error: "processing_failed",
+      message: `Failed to reach backend: ${message}`,
+      citations: [],
+    };
+  }
+}
+
+export async function fetchArticleAnnotations(
+  url: string,
+  text: string,
+  title?: string
+): Promise<ArticleAnnotationResponse> {
+  const settings = await getSettings();
+  const endpoint = `${settings.backendUrl}/api/annotations/article`;
+
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+
+  if (settings.byokLlmKey) {
+    headers["X-LLM-Key"] = settings.byokLlmKey;
+  }
+  if (settings.byokBraveKey) {
+    headers["X-Brave-Key"] = settings.byokBraveKey;
+  }
+  if (settings.byokPerplexityKey) {
+    headers["X-Perplexity-Key"] = settings.byokPerplexityKey;
+  }
+
+  try {
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ url, text, title }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => "Unknown error");
+      return {
+        error: "processing_failed",
+        message: `Server returned ${response.status}: ${errorText}`,
+        citations: [],
+      };
+    }
+
+    const data = await response.json() as ArticleAnnotationResponse;
     return data;
   } catch (err) {
     const message = err instanceof Error ? err.message : "Network error";

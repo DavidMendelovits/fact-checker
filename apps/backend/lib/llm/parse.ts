@@ -1,4 +1,4 @@
-import { RawCitation, ClaimType, Confidence } from "@citecast/shared";
+import { RawCitation, RawArticleCitation, ClaimType, Confidence } from "@citecast/shared";
 
 const VALID_CLAIM_TYPES: ClaimType[] = [
   "academic_paper",
@@ -42,6 +42,72 @@ function validateCitation(item: unknown): item is RawCitation {
     isValidClaimType(obj.claim_type) &&
     isValidConfidence(obj.confidence)
   );
+}
+
+function validateArticleCitation(item: unknown): item is RawArticleCitation {
+  if (!item || typeof item !== "object") return false;
+  const obj = item as Record<string, unknown>;
+
+  return (
+    typeof obj.excerpt === "string" &&
+    typeof obj.claim === "string" &&
+    typeof obj.search_query === "string" &&
+    isValidClaimType(obj.claim_type) &&
+    isValidConfidence(obj.confidence)
+  );
+}
+
+export function parseArticleLLMResponse(raw: string): RawArticleCitation[] {
+  let text = raw.trim();
+
+  // Strip markdown fences if present
+  text = stripMarkdownFences(text);
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(text);
+  } catch {
+    // Maybe it's wrapped in an object like {"citations": [...]}
+    // Try to extract an array substring
+    const arrayMatch = text.match(/\[[\s\S]*\]/);
+    if (!arrayMatch) {
+      console.error("[llm/parse] Failed to parse JSON from LLM response (article)");
+      return [];
+    }
+    try {
+      parsed = JSON.parse(arrayMatch[0]);
+    } catch {
+      console.error("[llm/parse] Failed to parse extracted array from LLM response (article)");
+      return [];
+    }
+  }
+
+  // Handle object wrapper like {"citations": [...]}
+  if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+    const obj = parsed as Record<string, unknown>;
+    const arrayKey = Object.keys(obj).find((k) => Array.isArray(obj[k]));
+    if (arrayKey) {
+      parsed = obj[arrayKey];
+    } else {
+      return [];
+    }
+  }
+
+  if (!Array.isArray(parsed)) {
+    return [];
+  }
+
+  // Validate each item and filter out invalid ones
+  const valid: RawArticleCitation[] = [];
+  for (const item of parsed) {
+    if (validateArticleCitation(item)) {
+      valid.push(item as RawArticleCitation);
+    } else {
+      console.warn("[llm/parse] Skipping invalid article citation item:", item);
+    }
+  }
+
+  return valid;
 }
 
 export function parseLLMResponse(raw: string): RawCitation[] {

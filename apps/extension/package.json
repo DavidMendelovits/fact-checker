@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "VITE_ENTRY=content vite build && VITE_ENTRY=popup vite build",
+    "build": "VITE_ENTRY=content vite build && VITE_ENTRY=popup vite build && VITE_ENTRY=background vite build && VITE_ENTRY=article-content vite build",
     "dev": "VITE_ENTRY=content vite build --watch"
   },
   "dependencies": {

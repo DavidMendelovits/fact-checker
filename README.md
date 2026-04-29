@@ -1,6 +1,9 @@
 # CiteCast
 
-Chrome extension that overlays source citations on YouTube videos. When you watch a video, CiteCast pulls the transcript, extracts every external reference (papers, articles, books, quotes, statistics), finds each source via search APIs, and shows clickable cards at the exact timestamps where claims are made.
+Chrome extension that surfaces source citations on YouTube videos and web articles. CiteCast extracts every external reference (papers, articles, books, quotes, statistics), finds each source via search APIs, and shows clickable cards where claims are made.
+
+**YouTube:** Automatic — citation cards appear at timestamps as the video plays.
+**Articles:** Opt-in — click the extension icon and hit "Analyze this page" to highlight cited claims inline.
 
 ## Setup
 
@@ -15,7 +18,13 @@ pnpm dev
 
 Backend runs at `http://localhost:3000`. Test with:
 ```bash
+# Video
 curl http://localhost:3000/api/annotations/dQw4w9WgXcQ
+
+# Article
+curl -X POST http://localhost:3000/api/annotations/article \
+  -H "Content-Type: application/json" \
+  -d '{"url":"https://example.com/article","text":"According to a 2023 Pew Research study...","title":"Example"}'
 ```
 
 ### Extension (Chrome)
@@ -28,7 +37,8 @@ Then in Chrome:
 1. Go to `chrome://extensions`
 2. Enable "Developer mode"
 3. Click "Load unpacked" → select `apps/extension/`
-4. Open any YouTube video with captions
+4. Open any YouTube video with captions (auto-activates)
+5. Or visit any article, click the CiteCast icon, and hit "Analyze this page"
 
 ### Environment variables
 
@@ -63,26 +73,29 @@ Override with `SEARCH_ROUTING_JSON`:
 
 ## Try it
 
-These videos work well for testing (lots of cited sources):
+**Videos** (lots of cited sources):
 - `CRXUOv34jQk` — Veritasium "The Simplest Math Problem No One Can Solve"
 - `rStL7niR7gs` — Kurzgesagt "The Egg"
 - `aircAruvnKk` — 3Blue1Brown "But what is a neural network?"
 
+**Articles:** Any long-form article with cited studies or attributed claims — op-eds, explainers, research summaries.
+
 ## Architecture
 
 ```
-Extension (content script) → GET /api/annotations/:youtube_id → Backend pipeline:
-  1. Fetch transcript (youtube-transcript)
-  2. LLM extraction (citations from transcript)
+YouTube:  Content script → GET /api/annotations/:youtube_id
+Articles: Popup → Background → Inject article script → POST /api/annotations/article
+
+Backend pipeline (shared):
+  1. Text input (transcript or article body)
+  2. LLM extraction (citations from text)
   3. Parallel search (Brave / Semantic Scholar / Perplexity)
   4. Cache in Vercel KV (30-day TTL)
-  5. Return VideoAnnotation JSON
+  5. Return annotation JSON
 ```
 
-Extension renders:
-- Citation cards overlaid on the player (synced to video time)
-- Timeline markers on the progress bar
-- Sidebar with full citation list, filters, and bibliography export
+YouTube renders: citation cards synced to video time, timeline markers, sidebar.
+Articles render: inline text highlights, positioned citation cards, sidebar.
 
 ## Tests
 
@@ -90,14 +103,14 @@ Extension renders:
 pnpm test
 ```
 
-42 unit/integration tests covering claim routing, LLM output parsing, and the full pipeline.
+71 unit/integration tests covering claim routing, LLM output parsing, video pipeline, and article pipeline.
 
 ## Known limitations
 
-- YouTube only (no other platforms)
-- Pre-recorded videos only (no live streams)
-- Requires captions/transcript to be available
-- Citation cards positioned in fixed corner (no smart positioning)
+- Pre-recorded YouTube videos only (no live streams)
+- Article analysis requires clicking the extension icon (opt-in via activeTab)
+- Article text extraction uses heuristics — login walls and JS-rendered content may not extract well
+- Citation cards positioned in fixed corner on YouTube (no smart positioning)
 - Confidence is LLM self-reported (no ML model)
 - Vercel KV free tier: ~30K commands/month
 - YouTube DOM changes may break overlay positioning; sidebar is the fallback

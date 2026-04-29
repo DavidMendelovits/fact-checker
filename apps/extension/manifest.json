@@ -2,8 +2,8 @@
   "manifest_version": 3,
   "name": "CiteCast",
   "version": "0.1.0",
-  "description": "See sources for every claim in YouTube videos",
-  "permissions": ["storage", "activeTab"],
+  "description": "See sources for every claim in YouTube videos and web articles",
+  "permissions": ["storage", "activeTab", "scripting"],
   "host_permissions": ["https://www.youtube.com/*"],
   "content_scripts": [
     {
@@ -13,6 +13,9 @@
       "run_at": "document_idle"
     }
   ],
+  "background": {
+    "service_worker": "dist/background.js"
+  },
   "action": {
     "default_popup": "popup.html",
     "default_icon": {

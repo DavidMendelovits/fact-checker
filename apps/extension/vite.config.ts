@@ -2,16 +2,17 @@ import { defineConfig } from "vite";
 import { resolve } from "path";
 import { copyFileSync, mkdirSync } from "fs";
 
-// We build content.ts and popup.ts as separate self-contained bundles.
-// Using lib mode per entry prevents Rollup from creating shared chunks
-// with hashed filenames that the extension manifest cannot reference.
+// We build each entry (content, popup, background, article-content) as a
+// separate self-contained bundle.  Using lib mode per entry prevents Rollup
+// from creating shared chunks with hashed filenames that the extension
+// manifest cannot reference.
 
 const entry = process.env.VITE_ENTRY ?? "content";
 
 export default defineConfig({
   build: {
     outDir: "dist",
-    emptyOutDir: entry === "content", // only clean on first build
+    emptyOutDir: entry === "content", // only clean on first build (content goes first)
     cssCodeSplit: false,
     lib: {
       entry: resolve(__dirname, `src/${entry}.ts`),

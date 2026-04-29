@@ -1,6 +1,6 @@
 import OpenAI from "openai";
-import { ClaimType, RawCitation, Source } from "@citecast/shared";
-import { SearchProvider } from "./types";
+import { ClaimType, Source } from "@citecast/shared";
+import { SearchProvider, BaseClaim } from "./types";
 
 export class PerplexityProvider implements SearchProvider {
   name = "perplexity";
@@ -24,7 +24,7 @@ export class PerplexityProvider implements SearchProvider {
     });
   }
 
-  async search(query: string, claim: RawCitation): Promise<Source[]> {
+  async search(query: string, claim: BaseClaim): Promise<Source[]> {
     const prompt = `Find the specific source for this citation from a video transcript.
 
 Claim: ${claim.claim}
@@ -54,7 +54,7 @@ If you can identify multiple sources, list them in order of relevance. Focus on 
     return this.extractSourcesFromResponse(content, claim);
   }
 
-  private extractSourcesFromResponse(content: string, _claim: RawCitation): Source[] {
+  private extractSourcesFromResponse(content: string, _claim: BaseClaim): Source[] {
     const sources: Source[] = [];
 
     // Extract URLs from the response

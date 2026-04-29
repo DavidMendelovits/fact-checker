@@ -1,5 +1,5 @@
-import { ClaimType, RawCitation, Source } from "@citecast/shared";
-import { SearchProvider } from "./types";
+import { ClaimType, Source } from "@citecast/shared";
+import { SearchProvider, BaseClaim } from "./types";
 
 interface BraveWebResult {
   url: string;
@@ -37,7 +37,7 @@ export class BraveSearchProvider implements SearchProvider {
     this.apiKey = apiKey;
   }
 
-  async search(query: string, _claim: RawCitation): Promise<Source[]> {
+  async search(query: string, _claim: BaseClaim): Promise<Source[]> {
     const url = new URL("https://api.search.brave.com/res/v1/web/search");
     url.searchParams.set("q", query);
     url.searchParams.set("count", "5");

@@ -235,6 +235,99 @@
     .save-status.visible {
       opacity: 1;
     }
+
+    /* Context section (article mode / YouTube status) */
+    .context-section {
+      background: #1a1a1a;
+      border-bottom: 1px solid #2a2a2a;
+      padding: 14px 20px;
+    }
+
+    .context-youtube {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .context-youtube-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #4caf50;
+      flex-shrink: 0;
+      animation: context-pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes context-pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .context-youtube-text {
+      font-size: 12px;
+      color: #aaa;
+    }
+
+    .context-youtube-text strong {
+      color: #e8e8e8;
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 1px;
+    }
+
+    .btn-analyze {
+      width: 100%;
+      background: #cc0000;
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 11px 20px;
+      transition: background 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-analyze:hover {
+      background: #e00000;
+    }
+
+    .btn-analyze:active {
+      background: #aa0000;
+    }
+
+    .btn-analyze:disabled {
+      background: #550000;
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+
+    .analyze-hint {
+      font-size: 11px;
+      color: #666;
+      margin-top: 8px;
+      line-height: 1.4;
+    }
+
+    .analyze-status {
+      font-size: 12px;
+      color: #aaa;
+      margin-top: 8px;
+      min-height: 16px;
+    }
+
+    .analyze-status.error {
+      color: #e57373;
+    }
+
+    .analyze-status.success {
+      color: #81c784;
+    }
   </style>
 </head>
 <body>
@@ -242,8 +335,13 @@
     <span class="header-logo">📺</span>
     <div>
       <div class="header-title">CiteCast</div>
-      <div class="header-subtitle">Source citations for YouTube</div>
+      <div class="header-subtitle">Source citations for YouTube &amp; articles</div>
     </div>
+  </div>
+
+  <!-- Context-aware section: shown above settings -->
+  <div class="context-section" id="contextSection">
+    <!-- Populated by popup.ts -->
   </div>
 
   <div class="content">

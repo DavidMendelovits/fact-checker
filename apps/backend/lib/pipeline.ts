@@ -1,8 +1,8 @@
-import { VideoAnnotation, RawCitation, ResolvedCitation, Source } from "@citecast/shared";
+import { VideoAnnotation, ArticleAnnotation, RawCitation, ResolvedCitation, RawArticleCitation, ResolvedArticleCitation, Source } from "@citecast/shared";
 import { fetchTranscript } from "./transcript";
 import { getLLMProvider } from "./llm";
 import { getSearchProviders, routeClaim } from "./search";
-import { SearchProvider } from "./search/types";
+import { SearchProvider, BaseClaim } from "./search/types";
 
 const STOPWORDS = new Set([
   "the", "a", "an", "of", "in", "on", "at", "to", "for",
@@ -17,7 +17,7 @@ function extractKeywords(text: string): string[] {
     .filter((token) => token.length >= 3 && !STOPWORDS.has(token));
 }
 
-function isSourceRelevant(source: Source, claim: RawCitation): boolean {
+function isSourceRelevant(source: Source, claim: BaseClaim): boolean {
   const keywords = extractKeywords(claim.claim);
   if (keywords.length === 0) return true; // Nothing to check against
 
@@ -25,10 +25,10 @@ function isSourceRelevant(source: Source, claim: RawCitation): boolean {
   return keywords.some((kw) => searchable.includes(kw));
 }
 
-async function resolveOneCitation(
-  citation: RawCitation,
+async function resolveCitation(
+  citation: BaseClaim,
   providers: Record<string, SearchProvider>
-): Promise<ResolvedCitation> {
+): Promise<Source[]> {
   const orderedProviders = routeClaim(citation, providers);
 
   for (const provider of orderedProviders) {
@@ -44,7 +44,7 @@ async function resolveOneCitation(
       const finalSources = relevant.length > 0 ? relevant : sources;
 
       if (finalSources.length > 0) {
-        return { ...citation, sources: finalSources };
+        return finalSources;
       }
     } catch (err) {
       console.warn(
@@ -56,7 +56,69 @@ async function resolveOneCitation(
   }
 
   // No provider returned results
-  return { ...citation, sources: [] };
+  return [];
+}
+
+async function resolveOneCitation(
+  citation: RawCitation,
+  providers: Record<string, SearchProvider>
+): Promise<ResolvedCitation> {
+  const sources = await resolveCitation(citation, providers);
+  return { ...citation, sources };
+}
+
+async function resolveOneArticleCitation(
+  citation: RawArticleCitation,
+  providers: Record<string, SearchProvider>
+): Promise<ResolvedArticleCitation> {
+  const sources = await resolveCitation(citation, providers);
+  return { ...citation, sources };
+}
+
+export async function processArticle(
+  url: string,
+  text: string,
+  title?: string
+): Promise<ArticleAnnotation> {
+  // 1. Extract citations via LLM
+  const llmProvider = getLLMProvider();
+  const rawCitations = await llmProvider.extractArticleCitations(text, title);
+
+  // 2. Get search providers
+  const searchProviders = getSearchProviders();
+
+  // 3. Resolve all citations in parallel
+  const settledResults = await Promise.allSettled(
+    rawCitations.map((citation) => resolveOneArticleCitation(citation, searchProviders))
+  );
+
+  // 4. Collect results
+  const citations: ResolvedArticleCitation[] = settledResults.map((result, i) => {
+    if (result.status === "fulfilled") {
+      return result.value;
+    }
+    // If the resolution itself threw (shouldn't happen given inner try/catch), return empty
+    console.error(
+      `[pipeline] Unexpected failure resolving article citation at index ${i}:`,
+      result.reason
+    );
+    return { ...rawCitations[i], sources: [] };
+  });
+
+  // 5. Compute stats
+  const resolved = citations.filter((c) => c.sources.length > 0).length;
+
+  return {
+    url,
+    title: title ?? "",
+    processed_at: new Date().toISOString(),
+    citations,
+    stats: {
+      total_claims: citations.length,
+      resolved,
+      unresolved: citations.length - resolved,
+    },
+  };
 }
 
 export async function processVideo(videoId: string): Promise<VideoAnnotation> {
