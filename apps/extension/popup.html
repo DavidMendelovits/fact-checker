@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CiteCast Settings</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      width: 380px;
+      min-height: 480px;
+      background: #0f0f0f;
+      color: #e8e8e8;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 16px 20px;
+      background: #1a1a1a;
+      border-bottom: 1px solid #333;
+    }
+
+    .header-logo {
+      font-size: 20px;
+    }
+
+    .header-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .header-subtitle {
+      font-size: 11px;
+      color: #888;
+      margin-top: 1px;
+    }
+
+    .content {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .section {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .section-title {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #888;
+      padding-bottom: 4px;
+      border-bottom: 1px solid #2a2a2a;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .field label {
+      font-size: 13px;
+      font-weight: 500;
+      color: #ccc;
+    }
+
+    .field .hint {
+      font-size: 11px;
+      color: #666;
+      margin-top: 2px;
+      line-height: 1.4;
+    }
+
+    .field input[type="text"],
+    .field input[type="password"],
+    .field input[type="url"] {
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 6px;
+      color: #e8e8e8;
+      font-size: 13px;
+      padding: 8px 10px;
+      width: 100%;
+      transition: border-color 0.15s;
+      outline: none;
+    }
+
+    .field input:focus {
+      border-color: #ff4444;
+    }
+
+    .field input::placeholder {
+      color: #555;
+    }
+
+    .toggle-field {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .toggle-field-text {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .toggle-field-label {
+      font-size: 13px;
+      font-weight: 500;
+      color: #ccc;
+    }
+
+    .toggle-field-hint {
+      font-size: 11px;
+      color: #666;
+    }
+
+    .toggle {
+      position: relative;
+      flex-shrink: 0;
+      width: 38px;
+      height: 22px;
+    }
+
+    .toggle input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+      position: absolute;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      inset: 0;
+      background: #333;
+      border-radius: 11px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .toggle-slider::before {
+      content: "";
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      left: 3px;
+      top: 3px;
+      background: #888;
+      border-radius: 50%;
+      transition: transform 0.2s, background 0.2s;
+    }
+
+    .toggle input:checked + .toggle-slider {
+      background: #cc0000;
+    }
+
+    .toggle input:checked + .toggle-slider::before {
+      background: #fff;
+      transform: translateX(16px);
+    }
+
+    .byok-note {
+      font-size: 11px;
+      color: #666;
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      border-radius: 6px;
+      padding: 10px 12px;
+      line-height: 1.5;
+    }
+
+    .byok-note a {
+      color: #ff6666;
+      text-decoration: none;
+    }
+
+    .byok-note a:hover {
+      text-decoration: underline;
+    }
+
+    .save-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding-top: 4px;
+    }
+
+    .btn-save {
+      flex: 1;
+      background: #cc0000;
+      border: none;
+      border-radius: 6px;
+      color: #fff;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 10px 20px;
+      transition: background 0.15s;
+    }
+
+    .btn-save:hover {
+      background: #e00000;
+    }
+
+    .btn-save:active {
+      background: #aa0000;
+    }
+
+    .save-status {
+      font-size: 12px;
+      color: #4caf50;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .save-status.visible {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <span class="header-logo">📺</span>
+    <div>
+      <div class="header-title">CiteCast</div>
+      <div class="header-subtitle">Source citations for YouTube</div>
+    </div>
+  </div>
+
+  <div class="content">
+    <!-- Backend -->
+    <div class="section">
+      <div class="section-title">Backend</div>
+      <div class="field">
+        <label for="backendUrl">Backend URL</label>
+        <input
+          type="url"
+          id="backendUrl"
+          placeholder="http://localhost:3000"
+          autocomplete="off"
+          spellcheck="false"
+        />
+        <span class="hint">The CiteCast API server that processes videos.</span>
+      </div>
+    </div>
+
+    <!-- Behavior -->
+    <div class="section">
+      <div class="section-title">Behavior</div>
+      <div class="toggle-field">
+        <div class="toggle-field-text">
+          <span class="toggle-field-label">Auto-show citation cards</span>
+          <span class="toggle-field-hint">Cards appear automatically during cited segments</span>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="autoShow" checked />
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div class="toggle-field">
+        <div class="toggle-field-text">
+          <span class="toggle-field-label">Include low-confidence citations</span>
+          <span class="toggle-field-hint">Show citations the AI is less certain about</span>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="includeLowConfidence" />
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- BYOK -->
+    <div class="section">
+      <div class="section-title">Bring Your Own Keys (Optional)</div>
+      <div class="byok-note">
+        Provide your own API keys to use CiteCast with your own accounts and quotas.
+        Keys are stored locally and sent only to the CiteCast backend.
+      </div>
+      <div class="field">
+        <label for="byokLlmKey">LLM API Key</label>
+        <input
+          type="password"
+          id="byokLlmKey"
+          placeholder="sk-..."
+          autocomplete="off"
+        />
+        <span class="hint">OpenAI, Anthropic, or compatible LLM provider key.</span>
+      </div>
+      <div class="field">
+        <label for="byokBraveKey">Brave Search API Key</label>
+        <input
+          type="password"
+          id="byokBraveKey"
+          placeholder="BSA..."
+          autocomplete="off"
+        />
+        <span class="hint">Used for web source search. Get one at <a href="https://brave.com/search/api/" target="_blank">brave.com/search/api</a>.</span>
+      </div>
+      <div class="field">
+        <label for="byokPerplexityKey">Perplexity API Key</label>
+        <input
+          type="password"
+          id="byokPerplexityKey"
+          placeholder="pplx-..."
+          autocomplete="off"
+        />
+        <span class="hint">Alternative search provider. Get one at <a href="https://docs.perplexity.ai/" target="_blank">perplexity.ai</a>.</span>
+      </div>
+    </div>
+
+    <!-- Save -->
+    <div class="save-row">
+      <button class="btn-save" id="saveBtn">Save Settings</button>
+      <span class="save-status" id="saveStatus">Saved!</span>
+    </div>
+  </div>
+
+  <script type="module" src="dist/popup.js"></script>
+</body>
+</html>
