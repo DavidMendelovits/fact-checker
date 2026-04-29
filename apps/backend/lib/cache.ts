@@ -11,9 +11,13 @@ function getCacheKey(videoId: string): string {
   return `annotations:${videoId}`;
 }
 
-function getArticleCacheKey(url: string): string {
-  const hash = createHash("sha256").update(url).digest("hex");
+function getArticleCacheKey(url: string, textFingerprint: string): string {
+  const hash = createHash("sha256").update(`${url}\n${textFingerprint}`).digest("hex");
   return `article:${hash}`;
+}
+
+function fingerprintText(text: string): string {
+  return createHash("sha256").update(text).digest("hex").slice(0, 16);
 }
 
 export async function getCachedAnnotation(videoId: string): Promise<VideoAnnotation | null> {
@@ -45,14 +49,14 @@ export async function cacheAnnotation(annotation: VideoAnnotation): Promise<void
   }
 }
 
-export async function getCachedArticleAnnotation(url: string): Promise<ArticleAnnotation | null> {
+export async function getCachedArticleAnnotation(url: string, text: string): Promise<ArticleAnnotation | null> {
   if (!isKvConfigured()) {
     return null;
   }
 
   try {
     const { kv } = await import("@vercel/kv");
-    const cached = await kv.get<ArticleAnnotation>(getArticleCacheKey(url));
+    const cached = await kv.get<ArticleAnnotation>(getArticleCacheKey(url, fingerprintText(text)));
     return cached ?? null;
   } catch (err) {
     console.warn("[cache] Failed to get cached article annotation:", err);
@@ -60,16 +64,15 @@ export async function getCachedArticleAnnotation(url: string): Promise<ArticleAn
   }
 }
 
-export async function cacheArticleAnnotation(annotation: ArticleAnnotation): Promise<void> {
+export async function cacheArticleAnnotation(annotation: ArticleAnnotation, text: string): Promise<void> {
   if (!isKvConfigured()) {
     return;
   }
 
   try {
     const { kv } = await import("@vercel/kv");
-    await kv.set(getArticleCacheKey(annotation.url), annotation, { ex: CACHE_TTL_SECONDS });
+    await kv.set(getArticleCacheKey(annotation.url, fingerprintText(text)), annotation, { ex: CACHE_TTL_SECONDS });
   } catch (err) {
     console.warn("[cache] Failed to cache article annotation:", err);
-    // Non-fatal — continue without caching
   }
 }

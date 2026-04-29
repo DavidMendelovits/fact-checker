@@ -49,6 +49,7 @@ export class BraveSearchProvider implements SearchProvider {
         "Accept-Encoding": "gzip",
         "X-Subscription-Token": this.apiKey,
       },
+      signal: AbortSignal.timeout(10_000),
     });
 
     if (!response.ok) {

@@ -53,7 +53,7 @@ export class SemanticScholarProvider implements SearchProvider {
       headers["x-api-key"] = this.apiKey;
     }
 
-    const response = await fetch(url.toString(), { headers });
+    const response = await fetch(url.toString(), { headers, signal: AbortSignal.timeout(10_000) });
 
     if (!response.ok) {
       throw new Error(

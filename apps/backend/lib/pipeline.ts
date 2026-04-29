@@ -17,9 +17,20 @@ function extractKeywords(text: string): string[] {
     .filter((token) => token.length >= 3 && !STOPWORDS.has(token));
 }
 
+function isSafeUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === "http:" || parsed.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
 function isSourceRelevant(source: Source, claim: BaseClaim): boolean {
+  if (!isSafeUrl(source.url)) return false;
+
   const keywords = extractKeywords(claim.claim);
-  if (keywords.length === 0) return true; // Nothing to check against
+  if (keywords.length === 0) return true;
 
   const searchable = `${source.title} ${source.snippet}`.toLowerCase();
   return keywords.some((kw) => searchable.includes(kw));

@@ -38,7 +38,7 @@ Please identify the most likely source(s) for this claim. For each source, provi
 If you can identify multiple sources, list them in order of relevance. Focus on finding the actual source being referenced.`;
 
     const response = await this.client.chat.completions.create({
-      model: "llama-3.1-sonar-small-128k-online",
+      model: "sonar",
       messages: [
         {
           role: "user",

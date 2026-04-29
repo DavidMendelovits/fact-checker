@@ -70,7 +70,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
   // Check cache first
   try {
-    const cached = await getCachedArticleAnnotation(url);
+    const cached = await getCachedArticleAnnotation(url, text as string);
     if (cached) {
       return NextResponse.json(cached, {
         status: 200,
@@ -90,7 +90,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const annotation = await processArticle(url, text, articleTitle);
 
     // Store in cache (non-blocking, best effort)
-    cacheArticleAnnotation(annotation).catch((err) => {
+    cacheArticleAnnotation(annotation, text as string).catch((err) => {
       console.warn("[route/article] Failed to cache article annotation:", err);
     });
 
